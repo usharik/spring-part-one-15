@@ -26,6 +26,12 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Contact> contacts = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user")
+    private List<LineItem> lineItems;
+
+//    @ManyToMany(mappedBy = "users")
+//    private List<Product> products = new ArrayList<>();
+
     public User() {
     }
 
@@ -70,6 +76,23 @@ public class User {
     public void addContact(Contact contact) {
         contact.setUser(this);
         contacts.add(contact);
+    }
+
+//    public List<Product> getProducts() {
+//        return products;
+//    }
+//
+//    public void setProducts(List<Product> products) {
+//        this.products = products;
+//    }
+
+
+    public List<LineItem> getLineItems() {
+        return lineItems;
+    }
+
+    public void setLineItems(List<LineItem> lineItems) {
+        this.lineItems = lineItems;
     }
 
     @Override

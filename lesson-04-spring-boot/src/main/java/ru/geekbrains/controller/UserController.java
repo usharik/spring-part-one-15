@@ -13,6 +13,8 @@ import ru.geekbrains.persist.User;
 import ru.geekbrains.persist.UserRepository;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/user")
@@ -28,10 +30,15 @@ public class UserController {
     }
 
     @GetMapping
-    public String listPage(Model model) {
+    public String listPage(Model model,
+                           @RequestParam("usernameFilter") Optional<String> usernameFilter) {
         logger.info("User list page requested");
 
-        model.addAttribute("users", userRepository.findAll());
+        List<User> users = usernameFilter
+                .map(userRepository::findByUsernameStartsWith)
+                .orElseGet(userRepository::findAll);
+
+        model.addAttribute("users", users);
         return "users";
     }
 
@@ -73,7 +80,7 @@ public class UserController {
     public String deleteUser(@PathVariable("id") Long id) {
         logger.info("Deleting user with id {}", id);
 
-        userRepository.delete(id);
+        userRepository.deleteById(id);
         return "redirect:/user";
     }
 

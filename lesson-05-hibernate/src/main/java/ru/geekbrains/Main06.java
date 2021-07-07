@@ -38,7 +38,7 @@ public class Main06 {
 //        user.getContacts().forEach(System.out::println);
 
         // N + 1
-        em.createQuery("select c from Contact c join fetch c.user", Contact.class).getResultList();
+        //em.createQuery("select c from Contact c join fetch c.user", Contact.class).getResultList();
 
         em.close();
     }

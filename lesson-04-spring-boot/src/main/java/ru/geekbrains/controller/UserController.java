@@ -3,6 +3,8 @@ package ru.geekbrains.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import ru.geekbrains.persist.User;
 import ru.geekbrains.persist.UserRepository;
+import ru.geekbrains.persist.UserSpecifications;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -31,14 +34,31 @@ public class UserController {
 
     @GetMapping
     public String listPage(Model model,
-                           @RequestParam("usernameFilter") Optional<String> usernameFilter) {
+                           @RequestParam("usernameFilter") Optional<String> usernameFilter,
+                           @RequestParam("minAge") Optional<Integer> minAge,
+                           @RequestParam("maxAge") Optional<Integer> maxAge,
+                           @RequestParam("page") Optional<Integer> page,
+                           @RequestParam("size") Optional<Integer> size) {
         logger.info("User list page requested");
 
-        List<User> users = usernameFilter
-                .map(userRepository::findByUsernameStartsWith)
-                .orElseGet(userRepository::findAll);
+//        List<User> users = userRepository.filterUsers(
+//                usernameFilter.orElse(null),
+//                minAge.orElse(null),
+//                maxAge.orElse(null));
 
-        model.addAttribute("users", users);
+        Specification<User> spec = Specification.where(null);
+        if (usernameFilter.isPresent() && !usernameFilter.get().isBlank()) {
+            spec = spec.and(UserSpecifications.usernamePrefix(usernameFilter.get()));
+        }
+        if (minAge.isPresent()) {
+            spec = spec.and(UserSpecifications.minAge(minAge.get()));
+        }
+        if (maxAge.isPresent()) {
+            spec = spec.and(UserSpecifications.maxAge(maxAge.get()));
+        }
+
+        model.addAttribute("users", userRepository.findAll(spec,
+                PageRequest.of(page.orElse(1) - 1, size.orElse(3))));
         return "users";
     }
 

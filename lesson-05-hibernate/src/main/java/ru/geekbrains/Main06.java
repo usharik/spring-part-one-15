@@ -6,6 +6,9 @@ import ru.geekbrains.entity.User;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.criteria.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main06 {
 
@@ -39,6 +42,25 @@ public class Main06 {
 
         // N + 1
         //em.createQuery("select c from Contact c join fetch c.user", Contact.class).getResultList();
+
+        em.createQuery("select u " +
+                "from User u " +
+                "inner join Contact c " +
+                "where u.username like '%a%' and c.type = 'Phone'", User.class);
+
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<User> query = cb.createQuery(User.class);
+        Root<User> root = query.from(User.class);
+
+        Join<Object, Object> contacts = root.join("contacts", JoinType.LEFT);
+
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.like(root.get("username"), "%a%"));
+        predicates.add(cb.equal(contacts.get("type"), "Phone"));
+
+        List<User> resultList = em.createQuery(query
+                .select(root)
+                .where(predicates.toArray(new Predicate[0]))).getResultList();
 
         em.close();
     }

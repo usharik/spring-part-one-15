@@ -45,6 +45,16 @@
                     <input type="text" class="form-control" id="usernameFilter" th:value="${param.usernameFilter}"
                            name="usernameFilter" placeholder="Username filter">
                 </div>
+                <div class="form-group mb-2 mr-2">
+                    <label for="minAge" class="sr-only">Minimal age</label>
+                    <input type="number" class="form-control" id="minAge" th:value="${param.minAge}"
+                           name="minAge" placeholder="Minimal age">
+                </div>
+                <div class="form-group mb-2 mr-2">
+                    <label for="maxAge" class="sr-only">Maximal age</label>
+                    <input type="number" class="form-control" id="maxAge" th:value="${param.maxAge}"
+                           name="maxAge" placeholder="Maximal age">
+                </div>
 
                 <button type="submit" class="btn btn-primary mb-2">Apply</button>
             </form>
@@ -54,15 +64,23 @@
             <table class="table table-bordered my-2">
                 <thead>
                 <tr>
-                    <th scope="col">Id</th>
-                    <th scope="col">Username</th>
+                    <th scope="col">Id
+                        <a href="#"><i class="fa fa-sort-down"></i></a>
+                    </th>
+                    <th scope="col">Username
+                        <a href="#"><i class="fa fa-sort-down"></i></a>
+                    </th>
+                    <th scope="col">Age
+                        <a href="#"><i class="fa fa-sort-down"></i></a>
+                    </th>
                     <th scope="col">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="user : ${users}">
+                <tr th:if="${users.hasContent()}" th:each="user : ${users.content}">
                     <th scope="row" th:text="${user.id}">1</th>
                     <td th:text="${user.username}">Alex</td>
+                    <td th:text="${user.age}">22</td>
                     <td>
                         <a class="btn btn-success" th:href="@{/user/{id}(id = ${user.id})}"><i class="fas fa-edit"></i></a>
                         <form class="d-inline" th:method="delete" th:action="@{/user/{id}(id = ${user.id})}">
@@ -70,8 +88,36 @@
                         </form>
                     </td>
                 </tr>
+
+                <tr th:unless="${users.hasContent()}">
+                    <td colspan="4">No data</td>
+                </tr>
+
                 </tbody>
             </table>
+        </div>
+
+        <div class="col-12">
+            <nav aria-label="...">
+                <ul class="pagination">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Previous</a>
+                    </li>
+
+                    <li th:each="num : ${#numbers.sequence(1, users.totalPages)}"
+                        th:classappend="${num == users.number + 1} ? 'active'"
+                        class="page-item">
+                        <a class="page-link"
+                           th:text="${num}"
+                           th:href="@{/user(page=${num}, size=${users.size}, usernameFilter=${param.usernameFilter},
+                           minAge=${param.minAge}, maxAge=${param.maxAge})}">1</a>
+                    </li>
+
+                    <li class="page-item">
+                        <a class="page-link" href="#">Next</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
 </div>

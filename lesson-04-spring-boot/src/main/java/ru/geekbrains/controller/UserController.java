@@ -3,8 +3,6 @@ package ru.geekbrains.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,12 +10,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import ru.geekbrains.persist.User;
-import ru.geekbrains.persist.UserRepository;
-import ru.geekbrains.persist.UserSpecifications;
+import ru.geekbrains.service.UserService;
 
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/user")
@@ -25,40 +20,19 @@ public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public UserController(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping
     public String listPage(Model model,
-                           @RequestParam("usernameFilter") Optional<String> usernameFilter,
-                           @RequestParam("minAge") Optional<Integer> minAge,
-                           @RequestParam("maxAge") Optional<Integer> maxAge,
-                           @RequestParam("page") Optional<Integer> page,
-                           @RequestParam("size") Optional<Integer> size) {
+                           UserListParams userListParams) {
         logger.info("User list page requested");
 
-//        List<User> users = userRepository.filterUsers(
-//                usernameFilter.orElse(null),
-//                minAge.orElse(null),
-//                maxAge.orElse(null));
-
-        Specification<User> spec = Specification.where(null);
-        if (usernameFilter.isPresent() && !usernameFilter.get().isBlank()) {
-            spec = spec.and(UserSpecifications.usernamePrefix(usernameFilter.get()));
-        }
-        if (minAge.isPresent()) {
-            spec = spec.and(UserSpecifications.minAge(minAge.get()));
-        }
-        if (maxAge.isPresent()) {
-            spec = spec.and(UserSpecifications.maxAge(maxAge.get()));
-        }
-
-        model.addAttribute("users", userRepository.findAll(spec,
-                PageRequest.of(page.orElse(1) - 1, size.orElse(3))));
+        model.addAttribute("users", userService.findWithFilter(userListParams));
         return "users";
     }
 
@@ -74,7 +48,7 @@ public class UserController {
     public String editUser(@PathVariable("id") Long id, Model model) {
         logger.info("Edit user page requested");
 
-        model.addAttribute("user", userRepository.findById(id)
+        model.addAttribute("user", userService.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found")));
         return "user_form";
     }
@@ -92,7 +66,7 @@ public class UserController {
 //            return "user_form";
 //        }
 
-        userRepository.save(user);
+        userService.save(user);
         return "redirect:/user";
     }
 
@@ -100,7 +74,7 @@ public class UserController {
     public String deleteUser(@PathVariable("id") Long id) {
         logger.info("Deleting user with id {}", id);
 
-        userRepository.deleteById(id);
+        userService.deleteById(id);
         return "redirect:/user";
     }
 

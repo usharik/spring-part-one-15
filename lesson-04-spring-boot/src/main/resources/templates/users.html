@@ -64,15 +64,9 @@
             <table class="table table-bordered my-2">
                 <thead>
                 <tr>
-                    <th scope="col">Id
-                        <a href="#"><i class="fa fa-sort-down"></i></a>
-                    </th>
-                    <th scope="col">Username
-                        <a href="#"><i class="fa fa-sort-down"></i></a>
-                    </th>
-                    <th scope="col">Age
-                        <a href="#"><i class="fa fa-sort-down"></i></a>
-                    </th>
+                    <th scope="col" th:replace="fragments/sort_header :: sort_header ('Id', 'id')"></th>
+                    <th scope="col" th:replace="fragments/sort_header :: sort_header ('Username', 'username')"></th>
+                    <th scope="col" th:replace="fragments/sort_header :: sort_header ('Age', 'age')"></th>
                     <th scope="col">Actions</th>
                 </tr>
                 </thead>
@@ -97,7 +91,7 @@
             </table>
         </div>
 
-        <div class="col-12">
+        <div class="col-12" th:if="${users.hasContent()}">
             <nav aria-label="...">
                 <ul class="pagination">
                     <li class="page-item disabled">
@@ -110,7 +104,7 @@
                         <a class="page-link"
                            th:text="${num}"
                            th:href="@{/user(page=${num}, size=${users.size}, usernameFilter=${param.usernameFilter},
-                           minAge=${param.minAge}, maxAge=${param.maxAge})}">1</a>
+                           minAge=${param.minAge}, maxAge=${param.maxAge}, sortField=${param.sortField})}">1</a>
                     </li>
 
                     <li class="page-item">

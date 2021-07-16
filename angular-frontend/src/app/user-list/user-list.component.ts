@@ -10,7 +10,12 @@ import {UserService} from "../model/user.service";
 export class UserListComponent implements OnInit {
 
   users: User[] = [];
+  totalPages: number = 0;
+  numbers: number[] = [];
+  pageNumber: number = 1;
   isError: boolean = false;
+  last: boolean = false;
+  first: boolean = false;
 
   constructor(public userService: UserService) {}
 
@@ -19,10 +24,15 @@ export class UserListComponent implements OnInit {
   }
 
   private retrieveAllUsers() {
-    this.userService.findAll()
+    this.userService.findAll(this.pageNumber)
       .then(res => {
         this.isError = false;
-        this.users = res;
+        this.users = res.content;
+        this.numbers = Array.from(Array(res.totalPages).keys());
+        this.pageNumber = res.pageable.pageNumber;
+        this.totalPages = res.totalPages;
+        this.last = res.last;
+        this.first = res.first;
       })
       .catch(err => {
         console.error(err);
@@ -39,5 +49,8 @@ export class UserListComponent implements OnInit {
       });
   }
 
-
+  goToPage(num: number) {
+    this.pageNumber = num;
+    this.retrieveAllUsers();
+  }
 }

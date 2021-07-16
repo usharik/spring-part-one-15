@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {User} from "./user";
 import {HttpClient} from "@angular/common/http";
+import {Page} from "./page";
 
 @Injectable({
   providedIn: 'root'
@@ -20,15 +21,15 @@ export class UserService {
   constructor(private http: HttpClient) {
   }
 
-
-  public findAll() {
+  public findAll(page: number) {
+    return this.http.get<Page>(`/api/v1/user/filter?page=${page}&size=3`).toPromise()
     //return this.http.get<User[]>('/api/v1/user/all').toPromise()
-    return new Promise<User[]>((resolve, reject) =>
-    {
-      resolve(
-        Object.values(this.users)
-      )
-    })
+    // return new Promise<User[]>((resolve, reject) =>
+    // {
+    //   resolve(
+    //     Object.values(this.users)
+    //   )
+    // })
   }
 
   public findById(id: number) {

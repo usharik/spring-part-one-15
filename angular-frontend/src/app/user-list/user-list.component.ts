@@ -30,7 +30,11 @@ export class UserListComponent implements OnInit {
       })
   }
 
-  delete(id: number) {
+  delete(id: number | null) {
+    if (id == null) {
+      console.error("Calling delete for null id");
+      return;
+    }
     this.userService.delete(id)
       .then(() => {
         this.retrieveUsers();

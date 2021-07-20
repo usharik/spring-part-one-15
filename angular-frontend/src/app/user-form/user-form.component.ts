@@ -10,7 +10,7 @@ import {ActivatedRoute, Router} from "@angular/router";
 })
 export class UserFormComponent implements OnInit {
 
-  public user = new User(-1, "", 0);
+  public user = new User(null, "", 0);
   public isError:boolean = false;
 
   constructor(private userService: UserService,
@@ -20,7 +20,7 @@ export class UserFormComponent implements OnInit {
   ngOnInit(): void {
     this.route.params.subscribe(param => {
       if (param.id == 'new') {
-        this.user = new User(-1, "", 0);
+        this.user = new User(null, "", 0);
         return;
       }
       this.userService.findById(param.id)

@@ -40,20 +40,26 @@ export class UserService {
   }
 
   public save(user: User) {
-    return new Promise<void>((resolve, reject) => {
-      if (user.id == -1) {
-        user.id = this.identity++;
-      }
-      this.users[user.id] = user;
-      resolve();
-    })
+    if (user.id == null) {
+      return this.http.post('/api/v1/user', user).toPromise()
+    } else {
+      return this.http.put('/api/v1/user', user).toPromise()
+    }
+    // return new Promise<void>((resolve, reject) => {
+    //   if (user.id == null) {
+    //     user.id = this.identity++;
+    //   }
+    //   this.users[user.id] = user;
+    //   resolve();
+    // })
   }
 
   public delete(id: number) {
-    return new Promise<void>((resolve, reject) => {
-      delete this.users[id];
-      resolve();
-    })
+    return this.http.delete<User>(`/api/v1/user/${id}`).toPromise();
+    // return new Promise<void>((resolve, reject) => {
+    //   delete this.users[id];
+    //   resolve();
+    // })
   }
 
 }

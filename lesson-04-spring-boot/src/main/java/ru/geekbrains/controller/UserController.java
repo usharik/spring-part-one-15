@@ -54,7 +54,7 @@ public class UserController {
     }
 
     @PostMapping
-    public String update(@Valid UserDto user, BindingResult result) {
+    public String update(@Valid @ModelAttribute("user") UserDto user, BindingResult result) {
         logger.info("Saving user");
 
         if (result.hasErrors()) {

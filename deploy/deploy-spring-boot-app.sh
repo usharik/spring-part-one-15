@@ -2,7 +2,7 @@
 
 echo "!------ Installing software ------!"
 apt update
-apt install mysql-server openjdk-11-jdk maven nginx
+apt install -y mysql-server openjdk-11-jdk maven nginx
 
 echo "!------ Configuring MySQL user ------!"
 mysql -u root -proot <<EOF

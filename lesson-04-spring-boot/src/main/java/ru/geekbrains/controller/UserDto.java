@@ -1,31 +1,24 @@
-package ru.geekbrains.persist;
+package ru.geekbrains.controller;
 
-import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 
-@Entity
-@Table(name = "users")
-public class User {
+public class UserDto {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @NotBlank
     private String username;
 
-    @Column(nullable = false)
+    @Min(value = 18)
     private Integer age;
 
-    @Column
+    @NotBlank
     private String password;
 
-    public User() {
-    }
-
-    public User(Long id, String username, String password, Integer age) {
+    public UserDto(Long id, String username, Integer age) {
         this.id = id;
         this.username = username;
-        this.password = password;
         this.age = age;
     }
 

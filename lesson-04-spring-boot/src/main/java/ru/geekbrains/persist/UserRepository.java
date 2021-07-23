@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
 
@@ -19,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
     List<User> filterUsers(@Param("prefix") String prefix,
                            @Param("minAge") Integer minAge,
                            @Param("maxAge") Integer maxAge);
+
+    Optional<User> findByUsername(String username);
 }

@@ -32,7 +32,7 @@ resource "aws_instance" "test-ec2-instance" {
   tags = {
     Name = var.ami_name
   }
-  subnet_id = aws_subnet.subnet-uno.id
+  subnet_id = aws_subnet.subnet-servers.id
 }
 
 resource "aws_eip" "ip-test-env" {
@@ -41,8 +41,7 @@ resource "aws_eip" "ip-test-env" {
 
   provisioner "remote-exec" {
     inline = [
-      "sudo apt update",
-      "sudo apt -y install mysql-client",
+      "(sudo apt update && sudo apt -y install mysql-client) || true"
     ]
     connection {
       type="ssh"
@@ -53,7 +52,7 @@ resource "aws_eip" "ip-test-env" {
   }
 }
 
-resource "aws_db_instance" "default" {
+resource "aws_db_instance" "mysql_db" {
   allocated_storage    = 10
   engine               = "mysql"
   engine_version       = "8.0.25"
@@ -62,4 +61,6 @@ resource "aws_db_instance" "default" {
   username             = "my_user"
   password             = "my_user_password"
   skip_final_snapshot  = true
+  db_subnet_group_name      = aws_db_subnet_group.mysql_subnets.id
+  vpc_security_group_ids    = [aws_security_group.mysql-security-group.id]
 }

@@ -9,10 +9,11 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import ru.geekbrains.persist.User;
+import ru.geekbrains.persist.RoleRepository;
 import ru.geekbrains.service.UserService;
 
 import javax.validation.Valid;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/user")
@@ -22,9 +23,12 @@ public class UserController {
 
     private final UserService userService;
 
+    private final RoleRepository roleRepository;
+
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, RoleRepository roleRepository) {
         this.userService = userService;
+        this.roleRepository = roleRepository;
     }
 
     @GetMapping
@@ -40,7 +44,7 @@ public class UserController {
     public String newUserForm(Model model) {
         logger.info("New user page requested");
 
-        model.addAttribute("user", new User());
+        model.addAttribute("user", new UserDto());
         return "user_form";
     }
 
@@ -50,14 +54,28 @@ public class UserController {
 
         model.addAttribute("user", userService.findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found")));
+        model.addAttribute("roles", roleRepository.findAll().stream()
+                .map(role -> new RoleDto(role.getId(), role.getName()))
+                .collect(Collectors.toList()));
         return "user_form";
     }
 
     @PostMapping
-    public String update(@Valid @ModelAttribute("user") UserDto user, BindingResult result) {
+    public String update(@Valid @ModelAttribute("user") UserDto user, BindingResult result, Model model) {
         logger.info("Saving user");
 
         if (result.hasErrors()) {
+            model.addAttribute("roles", roleRepository.findAll().stream()
+                    .map(role -> new RoleDto(role.getId(), role.getName()))
+                    .collect(Collectors.toList()));
+            return "user_form";
+        }
+
+        if (!user.getPassword().equals(user.getRepeatPassword())) {
+            model.addAttribute("roles", roleRepository.findAll().stream()
+                    .map(role -> new RoleDto(role.getId(), role.getName()))
+                    .collect(Collectors.toList()));
+            result.rejectValue("password", "", "Repeated password is not correct");
             return "user_form";
         }
 
@@ -87,3 +105,16 @@ public class UserController {
         return modelAndView;
     }
 }
+
+/*
+org.springframework.validation.BeanPropertyBindingResult: 3 errors
+Field error in object 'user' on field 'roles': rejected value [1]; codes
+[typeMismatch.user.roles,typeMismatch.roles,typeMismatch.java.util.Set,typeMismatch];
+arguments [org.springframework.context.support.DefaultMessageSourceResolvable: codes [user.roles,roles];
+arguments []; default message [roles]]; default message
+[Failed to convert property value of type 'java.lang.String' to required type 'java.util.Set' for property 'roles';
+nested exception is java.lang.IllegalStateException:
+Cannot convert value of type 'java.lang.String' to required type 'ru.geekbrains.controller.RoleDto'
+for property 'roles[0]': no matching editors or conversion strategy found]
+
+ */

@@ -7,33 +7,41 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import ru.geekbrains.controller.RoleDto;
 import ru.geekbrains.controller.UserDto;
 import ru.geekbrains.controller.UserListParams;
+import ru.geekbrains.persist.RoleRepository;
 import ru.geekbrains.persist.User;
 import ru.geekbrains.persist.UserRepository;
 import ru.geekbrains.persist.UserSpecifications;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
-                           PasswordEncoder passwordEncoder) {
+                           RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public List<UserDto> findAll() {
         return userRepository.findAll().stream()
-                .map(user -> new UserDto(user.getId(), user.getUsername(), user.getAge()))
+                .map(user -> new UserDto(user.getId(),
+                        user.getUsername(),
+                        user.getAge(),
+                        mapRolesDto(user)))
                 .collect(Collectors.toList());
     }
 
@@ -47,7 +55,7 @@ public class UserServiceImpl implements UserService {
         if (userListParams.getMinAge() != null) {
             spec = spec.and(UserSpecifications.minAge(userListParams.getMinAge()));
         }
-        if (userListParams.getMaxAge() != null ) {
+        if (userListParams.getMaxAge() != null) {
             spec = spec.and(UserSpecifications.maxAge(userListParams.getMaxAge()));
         }
 
@@ -58,13 +66,13 @@ public class UserServiceImpl implements UserService {
                         Sort.by(Optional.ofNullable(userListParams.getSortField())
                                 .filter(c -> !c.isBlank())
                                 .orElse("id"))))
-                .map(user -> new UserDto(user.getId(), user.getUsername(), user.getAge()));
+                .map(user -> new UserDto(user.getId(), user.getUsername(), user.getAge(), mapRolesDto(user)));
     }
 
     @Override
     public Optional<UserDto> findById(Long id) {
         return userRepository.findById(id)
-                .map(user -> new UserDto(user.getId(), user.getUsername(), user.getAge()));
+                .map(user -> new UserDto(user.getId(), user.getUsername(), user.getAge(), mapRolesDto(user)));
     }
 
     @Override
@@ -73,12 +81,21 @@ public class UserServiceImpl implements UserService {
                 userDto.getId(),
                 userDto.getUsername(),
                 passwordEncoder.encode(userDto.getPassword()),
-                userDto.getAge());
+                userDto.getAge(),
+                userDto.getRoles().stream()
+                        .map(roleDto -> roleRepository.getOne(roleDto.getId()))
+                        .collect(Collectors.toSet()));
         userRepository.save(user);
     }
 
     @Override
     public void deleteById(Long id) {
         userRepository.deleteById(id);
+    }
+
+    private static Set<RoleDto> mapRolesDto(User user) {
+        return user.getRoles().stream()
+                .map(role -> new RoleDto(role.getId(), role.getName()))
+                .collect(Collectors.toSet());
     }
 }

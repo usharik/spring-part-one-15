@@ -48,7 +48,7 @@
                     <select multiple class="form-control" id="roles" th:field="*{roles}" required>
                         <option th:each="role : ${roles}"
                                 th:text="${role.name}"
-                                th:value="${role.id}"
+                                th:value="${role.id} + ';' + ${role.name}"
                                 th:selected="${user.roles?.contains(role)}"></option>
                     </select>
                 </div>

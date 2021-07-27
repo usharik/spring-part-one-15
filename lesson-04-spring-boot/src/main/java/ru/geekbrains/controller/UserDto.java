@@ -25,6 +25,12 @@ public class UserDto {
     public UserDto() {
     }
 
+    public UserDto(Long id, String username, Integer age) {
+        this.id = id;
+        this.username = username;
+        this.age = age;
+    }
+
     public UserDto(Long id, String username, Integer age, Set<RoleDto> roles) {
         this.id = id;
         this.username = username;

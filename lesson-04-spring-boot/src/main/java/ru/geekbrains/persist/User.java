@@ -1,7 +1,6 @@
 package ru.geekbrains.persist;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Set;
 
 @Entity

@@ -1,4 +1,5 @@
 GET http://localhost:8080/spring-mvc-app/api/v1/user/all
+Authorization: Basic admin 123
 
 ###
 
@@ -12,10 +13,12 @@ GET http://localhost:8080/spring-mvc-app/api/v1/user/3
 
 POST http://localhost:8080/spring-mvc-app/api/v1/user
 Content-Type: application/json
+Authorization: Basic guest 123
 
 {
     "username": "from rest",
-    "age": 43
+    "age": 43,
+    "password": "ppp"
 }
 
 ###
